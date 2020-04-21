@@ -126,9 +126,18 @@ Now are ready to continue.
 
 Create Telegraf SNMP inputs for SNMPv2-MIB
 
-```bash
+### Ubuntu 18
+
+``` bash
 python SNMP2TELEGRAF.py /var/lib/snmp/mibs/ietf/SNMPv2-MIB 1.3.6.1.2.1.1
 ```
+
+### Centos 7
+
+``` bash
+python SNMP2TELEGRAF.py /usr/share/snmp/mibs/SNMPv2-MIB.txt 1.3.6.1.2.1.1
+```
+
 
 A new file called **INPUTS_SNMPv2-MIB.conf** should have been created.
 
@@ -139,8 +148,16 @@ Move the generated conf file to the telegraf.d folder, test it is ok and then re
 
 Create Telegraf SNMP inputs for IF-MIB
 
-```bash
+### Ubuntu 18
+
+``` bash
 python SNMP2TELEGRAF.py /var/lib/snmp/mibs/ietf/IF-MIB 1.3.6.1.2.1.2
+```
+
+### Centos 7
+
+``` bash
+python SNMP2TELEGRAF.py /usr/share/snmp/mibs/IF-MIB.txt 1.3.6.1.2.1.2
 ```
 
 A new file called **INPUTS_IF-MIB.conf** should have been created.
@@ -200,3 +217,102 @@ python SNMP2TELEGRAF.py /usr/share/snmp/mibs/CISCO-VTP-MIB.my 1.3.6.1.2
 A new file **INPUTS_CISCO-VTP-MIB.conf** should have been created.
 
 Move the generated conf file to the telegraf.d folder, test it is ok and then restart the telegraf service.
+
+## Important
+
+Note that all scalars and tables that are found will be added to the generated configuration file. This may be a lot, so you should decide which elements are important for your needs based on the devices official documentation. Using all scalars(fields) and tables may put unnecessary strain on your server resources and the SNMP device it is querying, so it is important to be sure to delete any fields and tables from the generated conf that you don't actually need.
+
+## Further Notes
+
+You need to tell it which MIB file you want to convert and which base OID to start translating from.
+
+Selecting which Base OID to use will take some research.
+
+I suggest doing an *snmptranslate* on the MIB file first, and select one of the Base OIDs returned.(see below)
+
+If you choose a Base OID to close to the root, it will result in a larger configuration file being generated.
+
+If you choose an OID to specific, then the script may error, or your generated template will contain no useful fields or tables.
+
+eg, 
+
+This produces a very small configuration file with almost no useful information.
+
+``` bash
+python SNMP2TELEGRAF.py /usr/share/snmp/mibs/CISCO-VTP-MIB.my 1.3.6.1.2.1.1
+```
+
+This is better, but it could be better still, 
+
+``` bash
+python SNMP2TELEGRAF.py /usr/share/snmp/mibs/CISCO-VTP-MIB.my 1.3.6.1.2.1
+```
+
+this may be just fine, 
+
+``` bash
+python SNMP2TELEGRAF.py /usr/share/snmp/mibs/CISCO-VTP-MIB.my 1.3.6.1.2
+```
+
+this may even be better. Only you can decide.
+
+``` bash
+python SNMP2TELEGRAF.py /usr/share/snmp/mibs/CISCO-VTP-MIB.my 1.3.6.1
+```
+
+### Example *snmptranslate*
+
+Example *snmptranslate* to find an appropriate OID to start from.
+
+``` bash
+snmptranslate -Tz -m /usr/share/snmp/mibs/CISCO-VTP-MIB.my
+```
+
+This will produce a lot of MIBs and corresponding OIDs
+
+``` text
+"org"                   "1.3"
+"dod"                   "1.3.6"
+"internet"              "1.3.6.1"
+"directory"             "1.3.6.1.1"
+"mgmt"                  "1.3.6.1.2"
+"mib-2"                 "1.3.6.1.2.1"
+"system"                "1.3.6.1.2.1.1"
+"sysDescr"              "1.3.6.1.2.1.1.1"
+"sysObjectID"           "1.3.6.1.2.1.1.2"
+"sysUpTime"             "1.3.6.1.2.1.1.3"
+...
+etc
+```
+
+From the above response, 
+
+* Using 1.3.6.1.2.1.1 will produce a configuration to small, 
+* Using 1.3.6.1.2.1 will produce a better configuration, 
+* Using 1.3.6.1.2 will produce an even better configuration with even more coverage.
+
+Only you can decide which you find is more useful for your needs.
+
+Other *snmptranslate* examples
+
+### Ubuntu 18
+
+``` bash
+snmptranslate -Tz -m /var/lib/snmp/mibs/ietf/SNMPv2-MIB
+```
+
+``` bash
+snmptranslate -Tz -m /var/lib/snmp/mibs/ietf/IF-MIB
+```
+
+### Centos 7
+
+``` bash
+snmptranslate -Tz -m /usr/share/snmp/mibs/SNMPv2-MIB.txt
+```
+
+``` bash
+snmptranslate -Tz -m /usr/share/snmp/mibs/IF-MIB.txt
+```
+
+The correct path of your MIBs files will depend on your OS.
