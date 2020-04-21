@@ -3,11 +3,14 @@
 SNMP2TELEGRAF is used to create Telegraf SNMP Inputs from MIBs files
 
 
-Usage: python SNMP2TELEGRAF.py Path-to-MIB-file Base-OID
-
-python SNMP2TELEGRAF.py /var/lib/snmp/mibs/ietf/SNMPv2-MIB 1.3.6.1.2.1.1
+Usage: 
+```bash
+python SNMP2TELEGRAF.py Path-to-MIB-file Base-OID
+```
 
 eg,
+
+I want to generate SNMP inputs for SNMPv2-MIB
 
 ## Ubuntu 18
 
@@ -20,6 +23,14 @@ python SNMP2TELEGRAF.py /var/lib/snmp/mibs/ietf/SNMPv2-MIB 1.3.6.1.2.1.1
 ```bash
 python SNMP2TELEGRAF.py /usr/share/snmp/mibs/SNMPv2-MIB 1.3.6.1.2.1.1
 ```
+
+A new file called **INPUTS_SNMPv2-MIB.conf** would hve been generated.
+
+Test the generated config for errors.
+```bash
+sudo telegraf -test -config INPUTS_SNMPv2-MIB.conf
+```
+
 
 Then move the generated conf file to the telegraf.d folder
 ```bash
