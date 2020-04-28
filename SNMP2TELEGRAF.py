@@ -18,32 +18,31 @@ import re
 from io import StringIO
 import csv
 
-if(not os.path.exists("snmp2telegraf.conf")):
-    MIB2C_CONFIG = """#Copyright 2020 Sean Bradley https://sbcode.net/grafana/
+if(not os.path.exists("snmp2zabbix.conf")):
+    MIB2C_CONFIG = """#Copyright 2020 Sean Bradley https://sbcode.net/zabbix/
 #Licensed under the Apache License, Version 2.0
 @open -@
 @foreach $s scalar@
-* scalar, $s, $s.decl, $s.objectID, $s.module, $s.parent, $s.subid, $s.enums, "$s.description"
+*** scalar, $s, $s.decl, $s.objectID, $s.module, $s.parent, $s.subid, $s.enums, "$s.description" ***
     @foreach $LABEL, $VALUE enum@
-* enum, $LABEL, $VALUE, " "
+*** enum, $LABEL, $VALUE, " " ***
     @end@
 @end@
 @foreach $t table@
-* table, $t, $t.decl, $t.objectID, $t.module, $t.parent, $t.subid, $t.enums, "$t.description"
+*** table, $t, $t.decl, $t.objectID, $t.module, $t.parent, $t.subid, $t.enums, "$t.description" ***
     @foreach $i index@
-* index, $i, $i.decl, $i.objectID, $i.module, $i.parent, $i.subid, $i.enums, "$i.description"
+*** index, $i, $i.decl, $i.objectID, $i.module, $i.parent, $i.subid, $i.enums, "$i.description" ***
         @foreach $LABEL, $VALUE enum@
-* enum, $LABEL, $VALUE, " "
+*** enum, $LABEL, $VALUE, " " ***
         @end@
     @end@
     @foreach $i nonindex@
-* nonindex, $i, $i.decl, $i.objectID, $i.module, $i.parent, $i.subid, $i.enums, "$i.description"
+*** nonindex, $i, $i.decl, $i.objectID, $i.module, $i.parent, $i.subid, $i.enums, "$i.description" ***
         @foreach $LABEL, $VALUE enum@
-* enum, $LABEL, $VALUE, " "
+*** enum, $LABEL, $VALUE, " " ***
         @end@
     @end@
 @end@
-
 """
 
     with open("snmp2telegraf.conf", "w") as mib2c_config_file:
@@ -92,7 +91,7 @@ def removeColons(s):
     return s.replace("::", " ")
 
 
-it = re.finditer(r'\* (.*"[^"]*")', MIB2C_DATA)
+it = re.finditer(r'\*\*\* (.*[^\*\*\*]*) \*\*\*', MIB2C_DATA)
 for l in it:
     line = l.groups()[0]
     groups = re.search(r'.*("[^"]*")', line)
